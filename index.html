@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NCAT Crash Course – E-Test</title>
+
+<style>
+body{font-family:Arial;background:#f4f6f8;margin:0}
+.container{max-width:900px;margin:30px auto;background:#fff;padding:20px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,.1)}
+h1,h2{text-align:center}
+.hidden{display:none}
+button{padding:10px 20px;border:none;border-radius:6px;cursor:pointer;background:#2563eb;color:#fff;font-size:16px}
+button:hover{background:#1e40af}
+#timer{font-size:18px;font-weight:bold;color:#dc2626;text-align:center;margin-bottom:15px}
+input{width:100%;padding:8px}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div class="container" id="loginSection">
+<h1>NCAT Crash Course E-Testing</h1>
+
+<label>Student Name</label>
+<input id="studentName"><br><br>
+
+<label>Father Name</label>
+<input id="fatherName"><br><br>
+
+<label>District</label>
+<input id="district"><br><br>
+
+<label>Test Password</label>
+<input id="testPass" type="password"><br><br>
+
+<button onclick="startTest()">Start Test</button>
+</div>
+
+<!-- TEST -->
+<div class="container hidden" id="testSection">
+<div id="timer"></div>
+
+<p>1. Powerhouse of the cell is?</p>
+<input type="radio" name="q1" value="1"> Mitochondria<br>
+<input type="radio" name="q1" value="0"> Nucleus<br><br>
+
+<p>2. Photosynthesis occurs in?</p>
+<input type="radio" name="q2" value="1"> Chloroplast<br>
+<input type="radio" name="q2" value="0"> Ribosome<br><br>
+
+<button onclick="submitTest()">Submit Test</button>
+</div>
+
+<!-- STUDENT RESULT -->
+<div class="container hidden" id="studentResult">
+<h2>Your Result</h2>
+<p id="resultText"></p>
+
+<div id="certificate" class="hidden" style="border:2px dashed #000;padding:20px;text-align:center">
+<h3>Certificate of Passing</h3>
+<p id="certText"></p>
+</div>
+</div>
+
+<script>
+/* SETTINGS */
+const TEST_PASSWORD = "NCAT2026";
+const TEST_START = new Date('2025-12-14T09:00:00');
+const TEST_END   = new Date('2025-12-20T12:00:00');
+const DURATION   = 90 * 60;
+
+let timeLeft = DURATION;
+let timer;
+
+function startTest(){
+  const now = new Date();
+  if(now < TEST_START || now > TEST_END){
+    alert("Test not active"); return;
+  }
+  if(testPass.value !== TEST_PASSWORD){
+    alert("Wrong Password"); return;
+  }
+
+  loginSection.classList.add("hidden");
+  testSection.classList.remove("hidden");
+
+  timer = setInterval(()=>{
+    document.getElementById("timer").innerText =
+    "Time Left: " + Math.floor(timeLeft/60) + ":" + String(timeLeft%60).padStart(2,"0");
+    timeLeft--;
+    if(timeLeft < 0) submitTest();
+  },1000);
+}
+
+function submitTest(){
+  clearInterval(timer);
+
+  let score = 0;
+  document.querySelectorAll("input[type=radio]:checked")
+    .forEach(r => score += +r.value);
+
+  const total = 2;
+  const percent = Math.round(score/total*100);
+  const grade = percent>=80?"A":percent>=60?"B":percent>=40?"C":"Fail";
+
+  const record = {
+    name: studentName.value,
+    father: fatherName.value,
+    district: district.value,
+    score,
+    percent,
+    grade,
+    date: new Date().toLocaleString()
+  };
+
+  // SAVE LOCALLY
+  let results = JSON.parse(localStorage.getItem("ncatResults")) || [];
+  results.push(record);
+  localStorage.setItem("ncatResults", JSON.stringify(results));
+
+  // SHOW STUDENT RESULT
+  testSection.classList.add("hidden");
+  studentResult.classList.remove("hidden");
+
+  resultText.innerText =
+  `Score: ${score}/${total} | Percentage: ${percent}% | Grade: ${grade}`;
+
+  if(grade !== "Fail"){
+    certificate.classList.remove("hidden");
+    certText.innerText =
+    `This certifies that ${record.name}, S/O ${record.father}, from ${record.district} has passed the NCAT E-Test.`;
+  }
+}
+</script>
+
+<!-- ADMIN BUTTON -->
+<div style="text-align:center;margin-top:20px">
+  <button id="adminBtn">Admin Only</button>
+</div>
+
+<script>
+document.getElementById("adminBtn").addEventListener("click", function(){
+  let pass = prompt("Enter Admin Password:");
+  if(pass === "ADMIN123"){
+    // Open results.html in a new tab/window
+    window.open("results.html","_blank");
+  } else {
+    alert("Wrong password");
+  }
+});
+</script>
+
+</body>
+</html>

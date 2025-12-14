@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NCAT Admin Results</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{font-family:Arial;background:#f4f6f8;margin:0}
+.container{max-width:1100px;margin:30px auto;background:#fff;padding:20px;border-radius:10px}
+h1{text-align:center}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th,td{border:1px solid #ccc;padding:8px;text-align:center}
+th{background:#2563eb;color:#fff}
+button{padding:8px 14px;border:none;border-radius:6px;background:#dc2626;color:#fff;cursor:pointer}
+button:hover{background:#991b1b}
+</style>
+</head>
+
+<body>
+
+<script>
+const ADMIN_PASSWORD = "ADMIN123";
+let entered = prompt("Enter Admin Password:");
+if(entered !== ADMIN_PASSWORD){
+  alert("Access Denied");
+  window.location.href = "index.html";
+}
+</script>
+
+<div class="container">
+<h1>NCAT E-Test – Result List</h1>
+
+<table id="resultTable">
+<tr>
+<th>#</th>
+<th>Name</th>
+<th>Father Name</th>
+<th>District</th>
+<th>Score</th>
+<th>%</th>
+<th>Grade</th>
+<th>Date</th>
+</tr>
+</table>
+
+<br>
+<button onclick="clearResults()">Clear All Results</button>
+</div>
+
+<script>
+let results = JSON.parse(localStorage.getItem("ncatResults")) || [];
+let table = document.getElementById("resultTable");
+
+results.forEach((r,i)=>{
+  let row = table.insertRow();
+  row.insertCell(0).innerText = i+1;
+  row.insertCell(1).innerText = r.name;
+  row.insertCell(2).innerText = r.father;
+  row.insertCell(3).innerText = r.district;
+  row.insertCell(4).innerText = r.score;
+  row.insertCell(5).innerText = r.percent + "%";
+  row.insertCell(6).innerText = r.grade;
+  row.insertCell(7).innerText = r.date;
+});
+
+function clearResults(){
+  let pass = prompt("Confirm Admin Password:");
+  if(pass === ADMIN_PASSWORD){
+    localStorage.removeItem("ncatResults");
+    location.reload();
+  } else {
+    alert("Wrong Password");
+  }
+}
+</script>
+
+</body>
+</html>
